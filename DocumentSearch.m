@@ -20,7 +20,6 @@ for i1 = search.startYr:1:endYr
     % pull the master.idx file for the year
     yearField = ['Y',num2str(i1)];
     
-    % TODO: If data is 
     % throw warning if data is not available (will still store locations)
     if ((i1+1) > search.dataLimit(1))
         warning(['Data for ',company.name, ' in ',yearField,...

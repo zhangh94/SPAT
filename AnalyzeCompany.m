@@ -55,8 +55,6 @@ for i1 = search.analysisStartYr:search.endYr
     
     %% Market Conditions
     
-    % TODO: calculate P/E with 3 year average earnings for startYr & endYr
-    
     % basic Price-Earnings Ratio
     company.data.(yearField).market.basicPERatio = ...
         data.MarketPriceMonthEnd/(data.EarningsPerShareBasic);
@@ -149,12 +147,11 @@ for i1 = search.analysisStartYr:search.endYr
         % store last year's data for easy access
         lYearData = company.data.(['Y',num2str(i1-1)]).data;
         
-        % TODO: Fix this
         % change in number of common shares
         company.data.(yearField).market.changeInCommonShares = ...
-            (data.CommonStockSharesOutstanding - ...
-            lYearData.CommonStockSharesOutstanding)/...
-            lYearData.CommonStockSharesOutstanding;
+            (data.NumberOfSharesOutstandingBasic - ...
+            lYearData.NumberOfSharesOutstandingBasic)/...
+            lYearData.NumberOfSharesOutstandingBasic;
         
         % diluted EPS growth/loss
         company.data.(yearField).profitability.dilutedEPSGrowth = ...

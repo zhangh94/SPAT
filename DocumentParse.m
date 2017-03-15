@@ -47,7 +47,6 @@ for i1 = startYr:1:endYr
         '/',company.data.(yearField).asn,'.hdr.sgml'];
     
     % TODO: Make this section way more robust
-    % TODO: Get price on report period if its a business day
     % TODO: Account for price adjustments (splits, etc.)
     % store period of report
     headerText = textscan(...
@@ -77,7 +76,6 @@ for i1 = startYr:1:endYr
     len = length(rawText);
     fclose(fid); % close file
     
-    % TODO: Add warning/error if no data is found
     % loop through the raw data and keep relevant data
     while (~endNdx && ndx < len)
         exp = asn;
@@ -89,13 +87,15 @@ for i1 = startYr:1:endYr
         ndx = ndx + 1; %increment counter
     end
     
-    % keep only relevant data
+    % throw warning if no data is found
     if (beginNdx == endNdx)
         warning(['Company not found for ',yearField]);
         continue;
     end
+    
+    % keep only relevant data
     rawData = rawText(beginNdx:endNdx);
-    % TODO: parse relevant data and save information
+    
     % TODO: Make this a function
     % TODO Combine this into the while loop?
     exp = '\t';

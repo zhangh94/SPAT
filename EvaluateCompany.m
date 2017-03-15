@@ -157,8 +157,7 @@ if (strcmpi(search.type,'VALUE'))
     
     % MISC RED FLAGS-------------------------------------------------------
     fprintf(fid,'\r\nMISC RED FLAGS\r\n\r\n');
-    % TODO: Should red flags be counted as pass/fail?
-    
+        
     % TODO: High CEO Salary
     
     % Huge Cash Reserves
