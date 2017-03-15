@@ -14,6 +14,11 @@ for i1 = search.analysisStartYr:search.endYr
     
     
     %% Value
+    
+    % basic market cap
+    company.data.(yearField).value.basicMarketCap = ...
+        data.MarketPriceMonthEnd * data.NumberOfSharesOutstandingBasic;
+    
     % book value
     company.data.(yearField).value.bookValue = ...
         data.Assets - data.Goodwill - data.Liabilities;
@@ -26,7 +31,20 @@ for i1 = search.analysisStartYr:search.endYr
     company.data.(yearField).value.netAssets = ...
         data.Assets - data.Liabilities;
     
+    % net current assets
+    company.data.(yearField).value.netCurrentAssets = ...
+        data.AssetsCurrent - data.LiabilitiesCurrent;
+    
     % TODO: owners earnings
+    
+    % total capital
+    company.data.(yearField).value.totalCapital = ...
+        data.LongTermDebt + data.LongTermDebtCurrent + ...
+        data.StockholdersEquity;
+    
+    % total market cap
+    company.data.(yearField).value.totalMarketCap = ...
+        data.MarketPriceMonthEnd * data.NumberOfDilutedSharesOutstanding;
     
     % working capital
     company.data.(yearField).value.workingCapital = ...
@@ -41,20 +59,18 @@ for i1 = search.analysisStartYr:search.endYr
     
     % basic Price-Earnings Ratio
     company.data.(yearField).market.basicPERatio = ...
-        data.MarketPriceMonthEnd/(data.NumberOfSharesOutstandingBasic/...
-        data.NetIncomeLoss);
+        data.MarketPriceMonthEnd/(data.EarningsPerShareBasic);
     
     % diluted Price-Earnings Ratio
     company.data.(yearField).market.dilutedPERatio = ...
-        data.MarketPriceMonthEnd/(data.NumberOfDilutedSharesOutstanding/...
-        data.NetIncomeLoss);
+        data.MarketPriceMonthEnd/(data.EarningsPerShareDiluted);
     
     if (data.DividendsCommonStock > 0)
         yDiv = yDiv + 1;
         
         % dividend yield at year end price
         company.data.(yearField).market.dividendYield = ...
-        data.CommonStockDividendsPerShareDeclared/...
+        data.CommonStockDividendsPerShare/...
         data.MarketPriceMonthEnd;
             
     else
@@ -86,11 +102,11 @@ for i1 = search.analysisStartYr:search.endYr
     
     % operating cash flow to total assets margin
     company.data.(yearField).profitability.operatingCashToAssetsRatio = ...
-        data.NetCashProvidedByUsedInOperatingActivities/data.Assets;
+        data.NetCashFromOperating/data.Assets;
     
     % operating margin
     company.data.(yearField).profitability.operatingMargin = ...
-        data.NetCashProvidedByUsedInOperatingActivities/...
+        data.NetCashFromOperating/...
         data.SalesRevenueNet;
     
     % price-net asset ratio
@@ -133,6 +149,7 @@ for i1 = search.analysisStartYr:search.endYr
         % store last year's data for easy access
         lYearData = company.data.(['Y',num2str(i1-1)]).data;
         
+        % TODO: Fix this
         % change in number of common shares
         company.data.(yearField).market.changeInCommonShares = ...
             (data.CommonStockSharesOutstanding - ...
@@ -144,6 +161,12 @@ for i1 = search.analysisStartYr:search.endYr
             (data.EarningsPerShareDiluted - ...
             lYearData.EarningsPerShareDiluted)/...
             lYearData.EarningsPerShareDiluted;
+        
+        % earnings growth/loss
+        company.data.(yearField).profitability.earningsGrowth = ...
+            (data.NetIncomeLoss - ...
+            lYearData.NetIncomeLoss)/...
+            lYearData.NetIncomeLoss;
     end
     
     %% Current Year
@@ -170,6 +193,14 @@ for i1 = search.analysisStartYr:search.endYr
         % years of continuous dividend payment
         company.data.(yearField).profitability.yearsContinuousDividends = ...
             yDiv;
+        
+    elseif (i1 == search.analysisStartYr) 
+        % TODO: Change this to use 3 years trailing data 
+        % three year average earnings for beginning year
+        company.data.(yearField).value.averageEarningsFuture3Years = ...
+            mean([data.NetIncomeLoss, ...
+            company.data.(['Y',num2str(i1 + 1)]).data.NetIncomeLoss, ...
+            company.data.(['Y',num2str(i1 + 2)]).data.NetIncomeLoss]);
     end
     
     

@@ -139,9 +139,40 @@ for i1 = startYr:1:endYr
         
         % set value to 0 if not found
         if (~isfield(company.data.(yearField).data,splitDict{j1}{1}))
-            company.data.(yearField).data.(splitDict{j1}{1}) = 0;
+            company.data.(yearField).data.(splitDict{j1}{1}) = false;
         end
         found = [];
+    end
+    
+    % perform some spot adjustments for reporting inconsistencies
+    data = company.data.(yearField).data;
+    
+    % obtain number of shares from EPS
+    if (~data.NumberOfSharesOutstandingBasic && data.EarningsPerShareBasic)
+        company.data.(yearField).data.NumberOfSharesOutstandingBasic = ...
+            data.NetIncomeLoss/data.EarningsPerShareBasic;
+    end
+    
+    % obtain diluted number of shares from diluted EPS
+    if (~data.NumberOfDilutedSharesOutstanding && ...
+            data.EarningsPerShareDiluted)
+        company.data.(yearField).data.NumberOfDilutedSharesOutstanding = ...
+            data.NetIncomeLoss/data.EarningsPerShareDiluted;
+    end
+    
+    % obtain liabilities data if liabilities is grouped with equity
+    if (~data.Liabilities && data.LiabilitiesAndStockholdersEquity)
+        company.data.(yearField).data.Liabilities = ...
+            data.LiabilitiesAndStockholdersEquity - ...
+            data.StockholdersEquity;
+    end
+    
+    % dividends per share declared
+    if (~data.CommonStockDividendsPerShare && ...
+            data.DividendsCommonStock)
+        company.data.(yearField).data.CommonStockDividendsPerShare = ...
+            data.DividendsCommonStock/...
+            company.data.(yearField).data.NumberOfSharesOutstandingBasic;
     end
     
     search.endYr = i1;
