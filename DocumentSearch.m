@@ -6,25 +6,17 @@ function [ company, search ] = DocumentSearch( search )
 
 % TODO: Reorder this into a class?
 
-% check if company id is given via cik or name
-if (search.cikFlag)
-    ndx = 1;
-    company.cik = search.param;
-else
-    ndx = 2;
-    company.name = search.param;
-end; % search by cik or name
-
 % declare/intialize some variables
+company.name = search.company;
 company.symbol = search.symbol;
 tmpIndex = 'tmp_master.idx';
-tmp = '';
 qtr = 1; % sets the starting search quarter
 endYr = search.endYr; % store expected endYr for financial data
 tic
 for i1 = search.startYr:1:endYr
     t1 = toc;
     found = false;
+    
     % pull the master.idx file for the year
     yearField = ['Y',num2str(i1)];
     
@@ -44,13 +36,14 @@ for i1 = search.startYr:1:endYr
     % TODO: Encapsulate this into a function
     for j1 = 1:1:4
         
-        % TODO: Stop the searching for the year once 10-k has been found. Store
-        % QTR the statement was found in
+        % Stop the searching for the year once 10-k has been found. 
+        % Store qtr the statement was found in
         options = weboptions;
         options.Timeout = 30;
         websave(tmpIndex,...
-            ['http://www.sec.gov/Archives/edgar/full-index/',num2str(i1 + 1),...
-            '/QTR',num2str(mod((qtr + j1 - 2),4) + 1),'/master.idx'],options);
+            ['http://www.sec.gov/Archives/edgar/full-index/',...
+            num2str(i1 + 1),'/QTR',num2str(mod((qtr + j1 - 2),4) + 1),...
+            '/master.idx'],options);
         
         % TODO: Encapsulate this into a function too
         % search for 10-k statement
@@ -60,6 +53,7 @@ for i1 = search.startYr:1:endYr
         rawText = rawText{1};
         fclose(fid);
         delete('tmp_master.idx');
+        
         % Search for data with regex
         for k1 = 1:length(rawText)
             
@@ -67,17 +61,17 @@ for i1 = search.startYr:1:endYr
             exp = '\|';
             splitStr = regexp(rawText{k1}, exp, 'split');
             if (length(splitStr) < 5); continue; end; % skip invalid string
-            exp = search.param;
+            exp = search.company;
             
             % TODO: Handle 10-K/A and 10-K/DE
             % search by cik or name
-            if(~isempty(regexp(splitStr{ndx}, exp,'ONCE')) && ...
+            if(~isempty(regexp(splitStr{2}, exp,'ONCE')) && ...
                     ~isempty(regexp(splitStr{3},...
                     ['^',search.filing,'$'],'ONCE')))
                 
                 % TODO: Why is CIK different/data is weird before 2001?
-                if (i1 == search.startYr)
-                    tmp = splitStr{(1 + 2) - ndx}; end;
+                if (i1 == search.startYr);...
+                        company.cik = splitStr{(1 + 2) - 2}; end;
                 
                 % store information
                 company.data.(yearField).form = splitStr{3};
@@ -106,7 +100,7 @@ for i1 = search.startYr:1:endYr
     % Check if company wasnt found
     if (~found); 
         warning(['Documents for company not found in ', yearField,...
-            '. Company Name or CIK may be incorrect or company may not',...
+            '. Company Name may be incorrect or company may not',...
             ' exist yet. Stopping Search...']);
         break;
     end
@@ -117,13 +111,5 @@ for i1 = search.startYr:1:endYr
     search.endYr = i1; % store last year data was sucessfully gathered
 end
 
-% store cik/name
-if (search.cikFlag)
-    company.name = tmp;
-    search.company = tmp;
-else
-    company.cik = tmp;
-    search.cik = tmp;
-end;
 end
 
