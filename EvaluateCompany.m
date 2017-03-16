@@ -20,7 +20,7 @@ end
 % store most recent data set for easier access
 yearField = ['Y', num2str(search.endYr)];
 data = company.data.(yearField);
-pastData = company.data.(['Y',num2str(search.analysisStartYr)]);
+pastData = company.data.(['Y',num2str(search.APIStartYr)]);
 
 % check how up to date current data is
 if (search.currentYear ~= search.endYr)
