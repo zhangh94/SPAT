@@ -167,12 +167,24 @@ for i1 = startYr:1:endYr
             data.StockholdersEquity;
     end
     
-    % dividends per share declared
-    if (~data.CommonStockDividendsPerShare && ...
-            data.DividendsCommonStock)
+    % obtain extra information from web API
+    % TODO: Encompass web API calls into a function
+    
+    
+    %dividends per share declared
+    if (~data.CommonStockDividendsPerShare)
+        statement = 'income_statement';
+        url = ['https://api.intrinio.com/financials/standardized?identifier=',...
+            company.symbol,'&statement=',statement,'&fiscal_year=',...
+            num2str(i1),'&fiscal_period=FY'];
+        options = weboptions;
+        options.Username = search.API.Username;
+        options.Password = search.API.Password;
+        
+        dat = webread(url,options);
         company.data.(yearField).data.CommonStockDividendsPerShare = ...
-            data.DividendsCommonStock/...
-            company.data.(yearField).data.NumberOfSharesOutstandingBasic;
+            dat.data(logical(strcmp({dat.data.tag},...
+            'cashdividendspershare'))).value;
     end
     
     search.endYr = i1;
