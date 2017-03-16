@@ -8,11 +8,10 @@ function [ company ] = AnalyzeCompany( company, search )
 
 % TODO: F-Score, M-Score, Graham's Value
 yDiv = 0; % years of continuous dividend payout
-for i1 = search.analysisStartYr:search.endYr
+for i1 = search.APIStartYr:search.endYr
     yearField = ['Y',num2str(i1)];
     data = company.data.(yearField).data;
-    
-    
+        
     %% Value
     
     % basic market cap
@@ -142,7 +141,7 @@ for i1 = search.analysisStartYr:search.endYr
         value.workingCapital/data.LongTermDebt;
     
     %% Change From Last Year
-    if (i1 ~= search.analysisStartYr)
+    if (i1 ~= search.APIStartYr)
         
         % store last year's data for easy access
         lYearData = company.data.(['Y',num2str(i1-1)]).data;
@@ -191,7 +190,7 @@ for i1 = search.analysisStartYr:search.endYr
         company.data.(yearField).profitability.yearsContinuousDividends = ...
             yDiv;
         
-    elseif (i1 == search.analysisStartYr) 
+    elseif (i1 == search.APIStartYr) 
         % TODO: Change this to use 3 years trailing data 
         % three year average earnings for beginning year
         company.data.(yearField).value.averageEarningsFuture3Years = ...

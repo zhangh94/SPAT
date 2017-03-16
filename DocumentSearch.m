@@ -103,7 +103,7 @@ for i1 = search.startYr:1:endYr
             ' exist yet. Stopping Search...']);
         break;
     end
-            
+                  
     t2 = toc;
     disp(['Document search for ', company.name, ' ', num2str(i1),... 
         ' completed in ',num2str(t2-t1),' seconds']);

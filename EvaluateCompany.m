@@ -10,7 +10,7 @@ function [ company ] = EvaluateCompany( company, search )
 warnings = {};
 % check if full range of data is available
 numYears = 10;
-if (search.analysisStartYr > (search.currentYear-numYears))
+if (search.APIStartYr > (search.currentYear-numYears))
     numYears = search.endYr - search.analysisStartYr;
     warnings = [warnings;'Available data does not span 10 years.',...
         ' Using ', num2str(numYears),...
