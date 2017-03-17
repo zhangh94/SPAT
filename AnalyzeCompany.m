@@ -104,7 +104,7 @@ for i1 = search.APIStartYr:search.endYr
     % operating margin
     company.data.(yearField).profitability.operatingMargin = ...
         data.NetCashFromOperating/...
-        data.SalesRevenueNet;
+        data.Revenues;
     
     % price-net asset ratio
     company.data.(yearField).profitability.priceNetAssetRatio = ...
@@ -134,7 +134,7 @@ for i1 = search.APIStartYr:search.endYr
     
     % return on sales
     company.data.(yearField).profitability.returnOnSales = ...
-        data.NetIncomeLoss/data.SalesRevenueNet;
+        data.NetIncomeLoss/data.Revenues;
     
     % working capital to debt ratio
     company.data.(yearField).profitability.workingCaptialDebtRatio = ...

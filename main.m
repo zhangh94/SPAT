@@ -16,14 +16,21 @@ search.API.Username = '6040823b62b6d0c110c089bff308acee';
 search.API.Password = '581659fa5c9382f65e5cb5ab1f38fecd';
 
 % specify name or cik number
+search.company = 'TARGET CORP';
+search.symbol = 'TGT'; % specify symbol to obtain market data
+
+% specify name or cik number
+search.company = 'GNC HOLDINGS INC';
+search.symbol = 'GNC'; % specify symbol to obtain market data
+
 % search.company = 'BOEING CO';
 % search.symbol = 'BA'; % specify symbol to obtain market data
 
 % search.company = 'RAYTHEON CO';
 % search.symbol = 'RTN'; % specify symbol to obtain market data
 
-search.company = 'LOCKHEED MARTIN CORP';
-search.symbol = 'LMT'; % specify symbol to obtain market data
+% search.company = 'LOCKHEED MARTIN CORP';
+% search.symbol = 'LMT'; % specify symbol to obtain market data
 
 % search.company = 'Northrop Grumman';
 % search.symbol = 'NOC'; % specify symbol to obtain market data

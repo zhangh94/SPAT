@@ -10,8 +10,8 @@ function [ company ] = EvaluateCompany( company, search )
 warnings = {};
 % check if full range of data is available
 numYears = 10;
-if (search.APIStartYr > (search.currentYear-numYears))
-    numYears = search.endYr - search.analysisStartYr;
+if (search.startYr > (search.currentYr-numYears))
+    numYears = search.endYr - search.startYr;
     warnings = [warnings;'Available data does not span 10 years.',...
         ' Using ', num2str(numYears),...
         ' years of data instead'];
@@ -20,10 +20,10 @@ end
 % store most recent data set for easier access
 yearField = ['Y', num2str(search.endYr)];
 data = company.data.(yearField);
-pastData = company.data.(['Y',num2str(search.APIStartYr)]);
+pastData = company.data.(['Y',num2str(search.startYr)]);
 
 % check how up to date current data is
-if (search.currentYear ~= search.endYr)
+if (search.currentYr ~= search.endYr)
     warnings = [warnings;...
         'Available data is not up to date. Most recent data is ',...
         num2str(daysact(data.reportPeriod,search.currentDate)),...
@@ -81,7 +81,7 @@ if (strcmpi(search.type,'VALUE'))
     
     % adequate size
     FilePrint('Adequate Size (Min $2B in Yearly Sales)');
-    if(data.data.SalesRevenueNet > 10E9);Pass();else Fail();end;
+    if(data.data.Revenues > 10E9);Pass();else Fail();end;
     
     % Conservatively Financed
     FilePrint('Conservatively Financed (Book Value >= 1/2 of Market Cap)');
@@ -174,24 +174,33 @@ if (strcmpi(search.type,'VALUE'))
     
     % Income From Financing Exceeds Income From Operations
     tmp = [];
-    for i1 = search.analysisStartYr:search.endYr
+    for i1 = search.startYr:search.endYr
        if (company.data.(['Y',num2str(i1)]).data.NetCashFromFinancing > ...
                company.data.(['Y',num2str(i1)]).data.NetCashFromOperating)
           tmp = [tmp, ['Y', num2str(i1)],' '];
        end
-        
     end
     if (~isempty(tmp))
        Flag(['Financing Income > Operating Income in ',tmp]); 
     end
     
+    % Increase in shares of common
+    tmp = [];
+    for i1 = search.startYr+1:search.endYr
+       if (company.data.(['Y',num2str(i1)]).market.changeInCommonShares > 0);...
+               tmp = [tmp, ['Y', num2str(i1)],' '];
+       end
+    end
+    if (~isempty(tmp))
+       Flag(['Increase in Number of Common Shares in ',tmp]); 
+    end
+    
     % No Income Tax Paid
     tmp = [];
-    for i1 = search.analysisStartYr:search.endYr
+    for i1 = search.startYr:search.endYr
        if (company.data.(['Y',num2str(i1)]).data.IncomeTax <= 0)
           tmp = [tmp, ['Y', num2str(i1)],' '];
        end
-        
     end
     if (~isempty(tmp))
        Flag(['No Income Tax Paid in ',tmp]); 
@@ -200,12 +209,11 @@ if (strcmpi(search.type,'VALUE'))
     % Unsafe Earnings Growth Growth
     % TODO: Report Earnings in flagged year?
     tmp = [];
-    for i1 = (search.analysisStartYr+1):search.endYr
+    for i1 = (search.startYr+1):search.endYr
        if (company.data.(['Y',num2str(i1)]).profitability.earningsGrowth...
                > 0.15)
           tmp = [tmp, ['Y', num2str(i1)],' '];
        end
-        
     end
     if (~isempty(tmp))
        Flag(['Unsafe Earnings Growth in ',tmp]); 

@@ -15,6 +15,8 @@ options.Password = search.API.Password;
 
 
 for i1 = search.APIStartYr:search.dataSetStartYr
+    % TODO: Place a message to indicate additional data is added to beginning
+    
     incompleteFlag = false;
     yearField = ['Y',num2str(i1)];
     
@@ -57,6 +59,8 @@ end
 
 %% fill in years after 2015
 for i1 = search.endYr:search.currentYr
+    % TODO: Place a message to indicate additional data is added to end
+    
     incompleteFlag = false;
     yearField = ['Y',num2str(i1)];
     
