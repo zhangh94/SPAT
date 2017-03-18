@@ -27,9 +27,10 @@ for i1 = search.startYr:1:endYr
             ' because expected filing date is ', ...
             num2str(i1+1),' QTR', num2str(qtr)]);
     end
-    if ((i1+1) >= search.dataLimit(1) && qtr > search.dataLimit(2))
+    if ((i1+1) >= search.currentYr && qtr >= search.currentQtr)
         warning(['Attempting to access future data in ', yearField, ...
             ' QTR', num2str(qtr),'. Skipping...']);
+        search.endYr = i1 - 1;
         continue;
     end
     % TODO: Encapsulate this into a function

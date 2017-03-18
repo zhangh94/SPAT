@@ -14,11 +14,14 @@ options.Username = search.API.Username;
 options.Password = search.API.Password;
 
 
-for i1 = search.APIStartYr:search.dataSetStartYr
-    % TODO: Place a message to indicate additional data is added to beginning
+for i1 = search.startYr:search.dataSetStartYr
     
     incompleteFlag = false;
     yearField = ['Y',num2str(i1)];
+    
+    % Place a message to indicate additional data is added to beginning
+    warning(['Augmenting SEC Financial Statement dataset with Web API data for ',...
+        yearField]);
     
     % download all 3 financial statements for the year
     statements = {'balance_sheet','cash_flow_statement','income_statement'};
@@ -59,10 +62,16 @@ end
 
 %% fill in years after 2015
 for i1 = search.endYr:search.currentYr
-    % TODO: Place a message to indicate additional data is added to end
     
     incompleteFlag = false;
     yearField = ['Y',num2str(i1)];
+    
+    % dont run if data is in the future
+    if (~isfield(company.data,yearField));continue;end;
+    
+    % Place a message to indicate additional data is added to end
+    warning(['Augmenting SEC Financial Statement dataset with Web API data for ',...
+        yearField]);
     
     % download all 3 financial statements for the year
     statements = {'balance_sheet','cash_flow_statement','income_statement'};

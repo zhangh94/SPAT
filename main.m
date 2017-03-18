@@ -7,7 +7,7 @@ Main script for analyzing a company's financials
 Currently works only with the financial datasets provided by the SEC
 %}
 
-close all; clear; clc; format compact;
+close all; clear; clc; format compact; fclose('all');
 
 %% Parameters
 % TODO: Make a user popup with fields that can be input
@@ -16,12 +16,28 @@ search.API.Username = '6040823b62b6d0c110c089bff308acee';
 search.API.Password = '581659fa5c9382f65e5cb5ab1f38fecd';
 
 % specify name or cik number
-search.company = 'TARGET CORP';
-search.symbol = 'TGT'; % specify symbol to obtain market data
+search.company = 'AGILENT TECHNOLOGIES INC';
+search.symbol = 'A'; % specify symbol to obtain market data
 
-% specify name or cik number
-search.company = 'GNC HOLDINGS INC';
-search.symbol = 'GNC'; % specify symbol to obtain market data
+% % specify name or cik number
+% search.company = 'ANTHEM';
+% search.symbol = 'ANTM'; % specify symbol to obtain market data
+
+% % specify name or cik number
+% search.company = 'TARGET CORP';
+% search.symbol = 'TGT'; % specify symbol to obtain market data
+
+% % specify name or cik number
+% search.company = 'GOPRO INC';
+% search.symbol = 'GPRO'; % specify symbol to obtain market data
+
+% % specify name or cik number
+% search.company = 'GNC HOLDINGS, INC.';
+% search.symbol = 'GNC'; % specify symbol to obtain market data
+
+% % specify name or cik number
+% search.company = 'GULFPORT ENERGY CORP';
+% search.symbol = 'GPOR'; % specify symbol to obtain market data
 
 % search.company = 'BOEING CO';
 % search.symbol = 'BA'; % specify symbol to obtain market data
@@ -43,6 +59,7 @@ search.symbol = 'GNC'; % specify symbol to obtain market data
 % NOTE: Years refer to calendar year at start of each fiscal year
 search.startYr = 2008;
 search.endYr = 2016;
+search.currentQtr = 1;
 
 % specify filing type
 % TODO: Eventually automatically do 10-K and the last 4 10-Qs
@@ -70,17 +87,23 @@ search.company = upper(search.company);
 %% Document Search and Data Extraction
 
 % TODO: Check if company dataset already exists (ex. NOC)
+tic; t1 = toc;
 % document search
 [company, search] = DocumentSearch(search);
 
-% document extraction
+% % document extraction
 [company, search] = DocumentParse(company, search);
 
-% web API supplement
+% % web API supplement
 [company, search] = APIParse(company, search);
 
-% market data parse
+% % market data parse
 company = MarketDataParse(company, search);
 %% Data Analysis
 company = AnalyzeCompany(company,search);
 company = EvaluateCompany(company,search);
+
+% generate plots
+
+t2 = toc;
+disp(['Entire search took ',num2str(t2-t1),' seconds']);

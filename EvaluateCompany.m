@@ -36,7 +36,7 @@ if (~data.value.totalMarketCap)
 end
 
 % open text file to write
-fid = fopen([company.name,'_report.txt'],'w');
+fid = fopen(['.\Reports\',company.name,'_report.txt'],'w');
 
 % TODO: Determine better alternative to nested function
 fails = 0;
@@ -81,7 +81,7 @@ if (strcmpi(search.type,'VALUE'))
     
     % adequate size
     FilePrint('Adequate Size (Min $2B in Yearly Sales)');
-    if(data.data.Revenues > 10E9);Pass();else Fail();end;
+    if(data.data.Revenues > 2E9);Pass();else Fail();end;
     
     % Conservatively Financed
     FilePrint('Conservatively Financed (Book Value >= 1/2 of Market Cap)');

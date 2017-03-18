@@ -8,7 +8,7 @@ function [ company ] = AnalyzeCompany( company, search )
 
 % TODO: F-Score, M-Score, Graham's Value
 yDiv = 0; % years of continuous dividend payout
-for i1 = search.APIStartYr:search.endYr
+for i1 = search.startYr:search.endYr
     yearField = ['Y',num2str(i1)];
     data = company.data.(yearField).data;
         
@@ -141,7 +141,7 @@ for i1 = search.APIStartYr:search.endYr
         value.workingCapital/data.LongTermDebt;
     
     %% Change From Last Year
-    if (i1 ~= search.APIStartYr)
+    if (i1 ~= search.startYr)
         
         % store last year's data for easy access
         lYearData = company.data.(['Y',num2str(i1-1)]).data;
@@ -190,7 +190,7 @@ for i1 = search.APIStartYr:search.endYr
         company.data.(yearField).profitability.yearsContinuousDividends = ...
             yDiv;
         
-    elseif (i1 == search.APIStartYr) 
+    elseif (i1 == search.startYr) 
         % TODO: Change this to use 3 years trailing data 
         % three year average earnings for beginning year
         company.data.(yearField).value.averageEarningsFuture3Years = ...
@@ -205,6 +205,6 @@ end
 
 % save company struct
 filename = [company.name,'.mat'];
-save(strrep(filename,' ','_'),'company');
+save(['.\Datasets\',strrep(filename,' ','_')],'company');
 end
 

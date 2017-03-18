@@ -51,8 +51,13 @@ if (iscell(rawData))
                 
                 % TODO: Implement logic to determine appropriate field to store
                 % store appropriate field (currently largest ndx value)
+                
+                % ignore fields from parent company
+                ndx = length(row);
+                while (~isempty(splitStr{row(ndx)}{4}));ndx = ndx - 1;end;
+                
                 outData.(splitDict{j1}{1}) = ...
-                    str2double(splitStr{row(end)}(8));
+                    str2double(splitStr{row(ndx)}(8));
                 continue; % store only first match
             end
         end
