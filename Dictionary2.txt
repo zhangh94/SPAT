@@ -1,0 +1,34 @@
+%Created:3/5/17
+%Updated:3/5/17
+%
+%DataStructureField|POSSIBLE DATA SET TERM1|POSSIBLE DATA SET TERM2|POSSIBLE DATA SET TERM3|...
+Assets|totalassets
+AssetsCurrent|totalcurrentassets
+Cash|cashandequivalents
+ChangeInCash|netchangeincash
+Depreciation|depreciationexpense
+DividendsCommonStock|paymentofdividends
+DividendsPerShare|cashdividendspershare
+EPSBasic|basiceps
+EPSDiluted|dilutedeps
+Goodwill|goodwill
+GrossProfit|totalgrossprofit
+IncomeTax|incometaxexpense
+InterestExpense|totalinterestexpense
+Liabilities|totalliabilities
+LiabilitiesAndStockholdersEquity|totalliabilitiesandequity
+LiabilitiesCurrent|totalcurrentliabilities
+LongTermDebt|longtermdebt
+NetCashFromFinancing|netcashfromfinancingactivities
+NetCashFromInvesting|netcashfrominvestingactivities
+NetCashFromOperating|netcashfromoperatingactivities
+NetIncomeLoss|netincome
+NumberOfDilutedShares|weightedavedilutedsharesos
+NumberOfBasicShares|weightedavebasicsharesos
+PaymentsForRepurchaseOfCommonStock|repurchaseofcommonequity
+%PensionContributions|PENSIONCONTRIBUTIONS
+%PreferredStockSharesOutstanding|PREFERREDSTOCKSHARESOUTSTANDING
+Revenues|REVENUES|totalrevenue
+StockholdersEquity|totalequity
+%TreasuryStockShares|TREASURYSTOCKSHARES
+%DONT LEAVE BLANK LINES
