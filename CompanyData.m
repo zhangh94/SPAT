@@ -5,14 +5,12 @@ classdef CompanyData
     %       data - company fundamentals (ex. assets, net income, revenue, etc.)
     %       market - company market and per share data (ex. EPS, PE, price)
     %       meta - metadata about 10-K filings
-
     
     properties
         calcs = struct();
         data = struct();
         market = struct();
-        meta = struct();
-                    
+        meta = struct();                    
     end
     
     properties (Access = protected)
@@ -20,8 +18,8 @@ classdef CompanyData
     end
     
     methods
-        function obj = CompanyData(a)
-            
+        % constructor
+        function obj = CompanyData(a)            
             % set current year, day, month, fiscal quarter
            obj.search.currentDate = date();
            obj.search.currentYr = year(obj.search.currentDate);
@@ -38,12 +36,8 @@ classdef CompanyData
                obj.search.startYr = 2008; 
            else
                obj.search.startYr = a;
-           end
-               
-        end
-        
-        
-    end
-    
+           end               
+        end   
+    end    
 end
 

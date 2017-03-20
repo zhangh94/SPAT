@@ -20,8 +20,6 @@ classdef CompanySearch < CompanyData
         % constructor
         function obj = CompanySearch(a,b)
             switch nargin % error
-                case 0
-                    error(message('MATLAB:narginchk:notEnoughInputs'));
                 case 1 % only specify company
                     obj.meta.symbol = a;
                 case 2 % specify company and start year
@@ -174,8 +172,8 @@ classdef CompanySearch < CompanyData
                 % market price on last business day of period
                 data = fetch(yahooFinance, obj.meta.symbol,...
                     obj.meta.(yearField).lBusDay);
-                obj.market.(yearField).yrEndPrice = data(5); % closing price
-                obj.market.(yearField).yrEndPriceAdj = data(7); % adjusted price
+                obj.market.(yearField).YrEndPrice = data(5); % closing price
+                obj.market.(yearField).YrEndPriceAdj = data(7); % adjusted price
                 
             end
             close(yahooFinance); %close connection to yahoo finance
@@ -232,7 +230,7 @@ classdef CompanySearch < CompanyData
             % fill in number of diluted shares
             if (data.NumberOfBasicShares == data.NumberOfDilutedShares && ...
                     data.EPSBasic ~= data.EPSDiluted)
-                outData.NumberofDilutedShares = data.NetIncomeLoss/...
+                outData.NumberOfDilutedShares = data.NetIncomeLoss/...
                     data.EPSDiluted;
             end
             
