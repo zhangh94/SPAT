@@ -3,7 +3,7 @@ classdef CompanyEval < CompanySearch
     %   Instantiation:
     %       1. Specify Stock Symbol Only
     %           ex. c = CompanyEval('NOC')
-    %       
+    %
     %       2. Specify Stock Symbol and Start Year
     %           ex. c = CompanyEval('NOC',2009)
     %           NOTE: Earliest start year is 2008
@@ -11,6 +11,7 @@ classdef CompanyEval < CompanySearch
     %
     %
     
+    % TODO: Figure out better way to handle exceptions than returnFlag
     methods
         % constructor
         function obj = CompanyEval(a,b)
@@ -32,18 +33,26 @@ classdef CompanyEval < CompanySearch
             tic
             obj = Search(obj);
             obj = Eval(obj);
+            ShowPlots(obj);
             disp(['Full run took ',num2str(toc),' seconds']);
+        end
+        
+        function obj = HeadlessRun(obj)
+            tic
+            obj = Search(obj);
+            obj = Eval(obj);
+            disp(['Full run for ',obj.meta.symbol,...
+                ' took ',num2str(toc),' seconds']);
         end
         
         function obj = Eval(obj)
             disp('Eval');
-            obj = Analyze(obj);
-            obj = Evaluate(obj);
-            Plot(obj);
+            if (~obj.returnFlag);obj = Analyze(obj);end
+            if (~obj.returnFlag);obj = Evaluate(obj);end
         end
         
         function ShowPlots(obj)
-            Plot(obj);
+            if (~obj.returnFlag);Plot(obj);end
         end
         
     end
@@ -58,9 +67,11 @@ classdef CompanyEval < CompanySearch
                 
                 % handle if 3 years of data unavailable-------------------------
                 if (obj.meta.YearsAvailableData < 3 && i1 == obj.search.startYr)
-                    error(['Only ',num2str(obj.meta.YearsAvailableData),...
+                    warning(['Only ',num2str(obj.meta.YearsAvailableData),...
                         ' years of financial data available.',...
                         'Investment not recommended']);
+                    obj.returnFlag = true;
+                    return;
                 end
                 yearField = ['Y',num2str(i1)];
                 data = obj.data.(yearField);
@@ -276,7 +287,7 @@ classdef CompanyEval < CompanySearch
             %             end
             
             % open text file to write
-            obj.fid = fopen(['.\Reports\',obj.meta.name,'_report.txt'],'w');
+            obj.fid = fopen(['.\Reports\',obj.meta.symbol,'_report.txt'],'w');
             if (~obj.fid);error('Error. File open error');end;
             
             %% Evaluations

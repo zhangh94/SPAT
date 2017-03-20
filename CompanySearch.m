@@ -9,9 +9,13 @@ classdef CompanySearch < CompanyData
     properties (Access = protected)
         
         % store default intrinio API username and password
+        %         API = struct(...
+        %             'Username','6040823b62b6d0c110c089bff308acee',...
+        %             'Password','581659fa5c9382f65e5cb5ab1f38fecd');
+        
         API = struct(...
-            'Username','6040823b62b6d0c110c089bff308acee',...
-            'Password','581659fa5c9382f65e5cb5ab1f38fecd');
+            'Username','fe6a8bf594e575134ba4d605b4625cc0',...
+            'Password','6a737298fef3de13bddf5f7647724cc1');
         
     end
     
@@ -30,11 +34,13 @@ classdef CompanySearch < CompanyData
         end
         
         function obj = Search(obj)
-            
-            obj = obj.SearchAPI();
-            obj = obj.SearchMeta();
-            obj = obj.SearchMarket();
             disp('Search');
+            obj = obj.SearchAPI();
+            
+            if (~obj.returnFlag)
+                obj = obj.SearchMeta();
+                obj = obj.SearchMarket();
+            end
         end
         
         % TODO: Remove this tester method
@@ -61,12 +67,19 @@ classdef CompanySearch < CompanyData
             % get company name and cik
             meta = webread(['https://api.intrinio.com/companies?identifier=',...
                 obj.meta.symbol],options);
+            if (isempty(meta))
+                obj.returnFlag = true;
+                warning('Company listing not found for %s', obj.meta.symbol);
+                return;
+            end
             obj.meta.name = meta.name;
             obj.meta.cik = meta.cik;
             
             for i1 = obj.search.startYr:obj.search.currentYr
                 if (obj.search.startYr == obj.search.currentYr)
-                    error('Company financials not found for %s', obj.meta.symbol);
+                    obj.returnFlag = true;
+                    warning('Company financials not found for %s', obj.meta.symbol);
+                    return;
                 end
                 noData = false;
                 endYr = false;
@@ -156,25 +169,38 @@ classdef CompanySearch < CompanyData
             yahooFinance = yahoo; % open connection to yahoo finance API;
             for i1 = obj.search.startYr:obj.search.endYr
                 yearField = ['Y',num2str(i1)];
-                
-
+                                
                 % find last business day in report period
                 if (~isfield(obj.meta,(yearField)))
                     warning(['No meta data available for ',yearField,...
                         '. Possibly before IPO date. Skipping...']);
+                    obj.search.startYr = i1 + 1;
                     continue;
                 end
                 meta = obj.meta.(yearField);
-
+                
                 obj.meta.(yearField).LastBusDay = datestr(lbusdate(...
                     year(meta.PeriodEnded), month(meta.PeriodEnded)));
                 
                 % market price on last business day of period
-                data = fetch(yahooFinance, obj.meta.symbol,...
-                    obj.meta.(yearField).LastBusDay);
+                try 
+                    data = fetch(yahooFinance, obj.meta.symbol,...
+                        obj.meta.(yearField).LastBusDay);
+                catch ME
+                    % if no data found, throw warning and set price to nan
+                    if(strcmp(ME.identifier,'datafeed:yahoo:fetchError'))
+                        warning(['While fetching market data for ',yearField]);
+                        warning(message(ME.identifier));
+                        obj.market.(yearField).YrEndPrice = nan;
+                        obj.market.(yearField).YrEndPriceAdj = nan;
+                        continue;
+                    else
+                        % if some other exception, dont handle
+                        rethrow(ME);
+                    end                                                            
+                end
                 obj.market.(yearField).YrEndPrice = data(5); % closing price
-                obj.market.(yearField).YrEndPriceAdj = data(7); % adjusted price
-                
+                obj.market.(yearField).YrEndPriceAdj = data(7); % adjusted price                
             end
             close(yahooFinance); %close connection to yahoo finance
         end
@@ -190,7 +216,7 @@ classdef CompanySearch < CompanyData
             outData = struct();
             
             % load in data dictionary and ignore comment lines
-            fid = fopen('Dictionary2.txt', 'r');
+            fid = fopen('Dictionary.txt', 'r');
             rawText = textscan(fid,'%s','Delimiter','\n','CommentStyle','%');
             rawText = rawText{1};
             fclose(fid);
