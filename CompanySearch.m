@@ -19,7 +19,7 @@ classdef CompanySearch < CompanyData
         
         % constructor
         function obj = CompanySearch(a,b)
-            switch nargin % error
+            switch nargin
                 case 1 % only specify company
                     obj.meta.symbol = a;
                 case 2 % specify company and start year
@@ -141,12 +141,12 @@ classdef CompanySearch < CompanyData
                 yearField = ['Y',num2str(obj.search.endYr - i1 + 1)];
                 
                 % store data and perform some formatting fixes
-                obj.meta.(yearField).filingDate = ...
+                obj.meta.(yearField).FilingDate = ...
                     datestr(metadata.data(i1).filing_date);
-                obj.meta.(yearField).periodEnded = ...
+                obj.meta.(yearField).PeriodEnded = ...
                     datestr(metadata.data(i1).period_ended);
                 obj.meta.(yearField).asn = metadata.data(i1).accno;
-                obj.meta.(yearField).reportURL = metadata.data(i1).report_url;
+                obj.meta.(yearField).ReportURL = metadata.data(i1).report_url;
                 
             end
         end
@@ -166,12 +166,12 @@ classdef CompanySearch < CompanyData
                 end
                 meta = obj.meta.(yearField);
 
-                obj.meta.(yearField).lBusDay = datestr(lbusdate(...
-                    year(meta.periodEnded), month(meta.periodEnded)));
+                obj.meta.(yearField).LastBusDay = datestr(lbusdate(...
+                    year(meta.PeriodEnded), month(meta.PeriodEnded)));
                 
                 % market price on last business day of period
                 data = fetch(yahooFinance, obj.meta.symbol,...
-                    obj.meta.(yearField).lBusDay);
+                    obj.meta.(yearField).LastBusDay);
                 obj.market.(yearField).YrEndPrice = data(5); % closing price
                 obj.market.(yearField).YrEndPriceAdj = data(7); % adjusted price
                 
