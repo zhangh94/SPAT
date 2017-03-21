@@ -160,6 +160,10 @@ classdef CompanyEval < CompanySearch
                 % operating margin
                 calcs.OperatingMargin = data.NetCashFromOperating/data.Revenues;
                 
+                % rate of depreciation
+                calcs.RateOfDepreciation = data.Depreciation/...
+                    (data.Depreciation - data.AssetsPPE);
+                
                 % ratio asset turnover
                 calcs.RatioAssetTurnover = data.Revenues/data.Assets;
                 
@@ -212,18 +216,27 @@ classdef CompanyEval < CompanySearch
                 calcs.ReturnOnSales = ...
                     data.NetIncomeLoss/data.Revenues;
                 
+                % TODO: Obtain ShortTermDebt info to calculate TotalDebt
+                % total debt
+                calcs.TotalDebt = data.LongTermDebt + 0; %data.ShortTermDebt
+                
                 
                 %% Change From Last Year
                 if (i1 ~= obj.search.startYr)
                     
                     % store last year's data for easy access
                     prevData = obj.data.(['Y',num2str(i1-1)]);
+                    prevCalcs = obj.calcs.(['Y',num2str(i1-1)]);
                     
                     % change in number of common shares
                     obj.market.(yearField).ChangeInNumCommon= ...
                         (data.NumberOfBasicShares - ...
                         prevData.NumberOfBasicShares)/...
                         prevData.NumberOfBasicShares;
+                    
+                    % change in working capital
+                    calcs.ChangeInWorkingCapital = (calcs.CapitalWorking - ...
+                        prevCalcs.CapitalWorking)/prevCalcs.CapitalWorking;
                     
                     % diluted EPS growth/loss
                     calcs.GrowthEPSDiluted = ...
@@ -266,6 +279,7 @@ classdef CompanyEval < CompanySearch
                 obj.calcs.(yearField) = calcs;
             end
             obj = FScore(obj);
+            obj = MScore(obj);
         end
         
         function obj = Evaluate(obj)
@@ -305,6 +319,10 @@ classdef CompanyEval < CompanySearch
             
             fprintf(obj.fid,['F-Score: ',...
                 num2str(obj.calcs.(yearField).FScore),'\r\n']);
+            
+            fprintf(obj.fid,['M-Score: ',...
+                num2str(obj.calcs.(yearField).MScore),...
+                ' (M > -2.22 is likely manipulator)\r\n']);
             
             % DEFENSIVE INVESTOR CRITERIA------------------------------------------
             fprintf(obj.fid,'\r\nDEFENSIVE INVESTOR CRITERIA\r\n\r\n');
@@ -598,6 +616,53 @@ classdef CompanyEval < CompanySearch
            obj.calcs.(currYr).FScore = FScore;
                       
         end
+        
+        % TODO: Test this function
+        function obj = MScore(obj)
+            % Compute the Beneish M-Score to detect earnings manipulation (ref)
+            % https://www.scribd.com/doc/33484680/The-Detection-of-Earnings-Manipulation-Messod-D-Beneish
+            
+            currYr = ['Y',num2str(obj.search.endYr)];
+            prevYr = ['Y',num2str(obj.search.endYr-1)];
+            currData = obj.data.(currYr);
+            prevData = obj.data.(prevYr);
+            currCalcs = obj.calcs.(currYr);
+            prevCalcs = obj.calcs.(prevYr);
+            
+            % day sales in reveivables index
+            DSRI = (currData.AccountsReceivableNet/currData.Revenues)/...
+                (prevData.AccountsReceivableNet/prevData.Revenues);
+            
+            % gross margin index
+            GMI = currCalcs.GrossMargin/prevCalcs.GrossMargin;
+            
+            % asset quality index
+            AQI = (currData.AssetsNonCurrent - currData.AssetsPPE)/...
+                currData.Assets;
+            
+            % sales growth index
+            SGI = currData.Revenues/prevData.Revenues;
+            
+            % depreciation index
+            DEPI = prevCalcs.RateOfDepreciation/currCalcs.RateOfDepreciation;
+            
+            % sales general and administrative expenses index
+            SGAI = (currData.SGAExpenses/currData.Revenues)/...
+                (prevData.SGAExpenses/prevData.Revenues);
+            
+            % leverage index
+            LVGI = (currCalcs.TotalDebt/currData.Assets)/...
+                (prevCalcs.TotalDebt/prevData.Assets);
+            
+            % total accruals to total assets
+            TATA = (currCalcs.ChangeInWorkingCapital - currData.ChangeInCash...
+                - currData.Depreciation)/currData.Assets;
+            
+            obj.calcs.(currYr).MScore = -4.84 + 0.92*DSRI + 0.528*GMI +...
+                0.404*AQI + 0.892*SGI + 0.115*DEPI - 0.172*SGAI + 4.679*TATA...
+                - 0.327*LVGI;
+        end
+        
         function obj = Pass(obj)
             fprintf(obj.fid,[obj.passText,'\r\n']); obj.passes = obj.passes + 1;
         end
