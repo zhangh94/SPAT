@@ -2,8 +2,11 @@
 %Updated:3/5/17
 %
 %DataStructureField|POSSIBLE DATA SET TERM1|POSSIBLE DATA SET TERM2|POSSIBLE DATA SET TERM3|...
+AccountsReceivableNet|notereceivable|netreceivable|accountsreceivable
 Assets|totalassets
 AssetsCurrent|totalcurrentassets
+AssetsNonCurrent|totalnoncurrentassets
+AssetsPPE|netppe
 Cash|cashandequivalents
 ChangeInCash|netchangeincash
 Depreciation|depreciationexpense
@@ -30,6 +33,7 @@ PaymentsForRepurchaseOfCommonStock|repurchaseofcommonequity
 %PreferredStockSharesOutstanding|PREFERREDSTOCKSHARESOUTSTANDING
 Revenues|REVENUES|totalrevenue
 RevenuesCostOf|totalcostofrevenue
+SGAExpenses|sgaexpense
 StockholdersEquity|totalequity
 %TreasuryStockShares|TREASURYSTOCKSHARES
 %DONT LEAVE BLANK LINES

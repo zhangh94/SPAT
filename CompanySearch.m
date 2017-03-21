@@ -94,7 +94,7 @@ classdef CompanySearch < CompanyData
                 while (ndx <= length(statements))
                     
                     % sample URL: 
-                    %https://api.intrinio.com/financials/standardized?identifier=NOC&statement=income_statement&fiscal_year=2016&fiscal_period=FY                    
+                    %https://api.intrinio.com/financials/standardized?identifier=NOC&statement=income_statement&fiscal_year=2016&fiscal_period=FY
                     url = ['https://api.intrinio.com/financials/standardized',...
                         '?identifier=',obj.meta.symbol,...
                         '&statement=',statements{ndx},...
@@ -276,6 +276,12 @@ classdef CompanySearch < CompanyData
             
             % correctly set long term debt to 0
             if (isnan(data.LongTermDebt)); outData.LongTermDebt = 0;end;
+            
+            % fill in change in cash
+            if (isnan(data.ChangeInCash))
+                data.ChangeInCash = data.NetCashFromOperating + ...
+                    data.NetCashFromInvesting + data.NetCashFromFinancing;
+            end
         end
         
     end
