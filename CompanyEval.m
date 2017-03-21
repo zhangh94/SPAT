@@ -617,6 +617,7 @@ classdef CompanyEval < CompanySearch
                       
         end
         
+
         % TODO: Test this function
         function obj = MScore(obj)
             % Compute the Beneish M-Score to detect earnings manipulation (ref)
