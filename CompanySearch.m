@@ -13,9 +13,13 @@ classdef CompanySearch < CompanyData
         %             'Username','6040823b62b6d0c110c089bff308acee',...
         %             'Password','581659fa5c9382f65e5cb5ab1f38fecd');
         
+%         API = struct(...
+%             'Username','fe6a8bf594e575134ba4d605b4625cc0',...
+%             'Password','6a737298fef3de13bddf5f7647724cc1');
+
         API = struct(...
-            'Username','fe6a8bf594e575134ba4d605b4625cc0',...
-            'Password','6a737298fef3de13bddf5f7647724cc1');
+            'Username','79ec188eeae360c1e7f0f8f6074d757a',...
+            'Password','c54c6314120371dfd293b8f22f1d0200');
         
     end
     
@@ -89,6 +93,8 @@ classdef CompanySearch < CompanyData
                 
                 while (ndx <= length(statements))
                     
+                    % sample URL: 
+                    %https://api.intrinio.com/financials/standardized?identifier=NOC&statement=income_statement&fiscal_year=2016&fiscal_period=FY                    
                     url = ['https://api.intrinio.com/financials/standardized',...
                         '?identifier=',obj.meta.symbol,...
                         '&statement=',statements{ndx},...
@@ -267,6 +273,9 @@ classdef CompanySearch < CompanyData
                     data.LiabilitiesAndStockholdersEquity - ...
                     data.StockholdersEquity;
             end
+            
+            % correctly set long term debt to 0
+            if (isnan(data.LongTermDebt)); outData.LongTermDebt = 0;end;
         end
         
     end

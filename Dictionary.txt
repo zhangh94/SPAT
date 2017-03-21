@@ -29,6 +29,7 @@ PaymentsForRepurchaseOfCommonStock|repurchaseofcommonequity
 %PensionContributions|PENSIONCONTRIBUTIONS
 %PreferredStockSharesOutstanding|PREFERREDSTOCKSHARESOUTSTANDING
 Revenues|REVENUES|totalrevenue
+RevenuesCostOf|totalcostofrevenue
 StockholdersEquity|totalequity
 %TreasuryStockShares|TREASURYSTOCKSHARES
 %DONT LEAVE BLANK LINES

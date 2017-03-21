@@ -148,21 +148,31 @@ classdef CompanyEval < CompanySearch
                     data.DividendsCommonStock = 0;
                 end;
                 
-                %% Profitability
-                
+                %% Profitability                                
                 % dividend payout rate
                 calcs.DividendPayoutRate = ...
                     data.DividendsCommonStock/data.NetIncomeLoss;
                 
+                % gross margin
+                calcs.GrossMargin = (data.Revenues - data.RevenuesCostOf)/...
+                    data.Revenues;
+                
                 % operating margin
                 calcs.OperatingMargin = data.NetCashFromOperating/data.Revenues;
                 
-                % ratio cash flow operating to assets total
-                calcs.RatioOperatingCashFlowToAssets = ...
-                    data.NetCashFromOperating/data.Assets;
+                % ratio asset turnover
+                calcs.RatioAssetTurnover = data.Revenues/data.Assets;
                 
                 % ratio asset liability
-                calcs.RatioAssetLiability = data.Assets/data.Liabilities;
+                calcs.RatioAssetsLiabilities = data.Assets/data.Liabilities;
+                
+                % ratio asset liability current
+                calcs.RatioAssetsLiabilitiesCurrent = ...
+                    data.AssetsCurrent/data.LiabilitiesCurrent;
+                
+                % ratio operating cash flow assets total
+                calcs.RatioOperatingCashFlowAssetsTotal = ...
+                    data.NetCashFromOperating/data.Assets;
                 
                 % ratio price assets net
                 calcs.RatioPriceAssetsNet = ...
@@ -182,6 +192,10 @@ classdef CompanyEval < CompanySearch
                 % return on net asset capital
                 calcs.ReturnOnAssetsNet = ...
                     data.NetIncomeLoss/calcs.AssetsNet;
+                
+                % return on assets total
+                calcs.ReturnOnAssetsTotal = ...
+                    data.NetIncomeLoss/data.Assets;
                 
                 % return on book value
                 calcs.ReturnOnBookValue = ...
@@ -235,7 +249,7 @@ classdef CompanyEval < CompanySearch
                         data.NumberOfDilutedShares);
                     
                     % trailing three year earning power
-                    obj.calcs.Trailing3YrEarningPower = ...
+                    calcs.Trailing3YrEarningPower = ...
                         1/obj.market.(yearField).Trailing3YrPERatio;
                     
                     % years of continuous dividend payment
@@ -251,6 +265,7 @@ classdef CompanyEval < CompanySearch
                 end
                 obj.calcs.(yearField) = calcs;
             end
+            obj = FScore(obj);
         end
         
         function obj = Evaluate(obj)
@@ -278,13 +293,7 @@ classdef CompanyEval < CompanySearch
                     'Available data is not up to date. Most recent data is ',...
                     num2str(daysact(meta.PeriodEnded,obj.search.currentDate)),...
                     ' days old'];
-            end
-            
-            % TODO: Remove after testing
-            %             % check if total market cap data is available
-            %             if (~data.value.totalMarketCap)
-            %                 warnings = [warnings;'Total Market Cap data unavailable.'];
-            %             end
+            end           
             
             % open text file to write
             obj.fid = fopen(['.\Reports\',obj.meta.symbol,'_report.txt'],'w');
@@ -293,6 +302,9 @@ classdef CompanyEval < CompanySearch
             %% Evaluations
             fprintf(obj.fid,['Performing Value Investing Evaluation for ',...
                 obj.meta.name,'\r\n']);
+            
+            fprintf(obj.fid,['F-Score: ',...
+                num2str(obj.calcs.(yearField).FScore),'\r\n']);
             
             % DEFENSIVE INVESTOR CRITERIA------------------------------------------
             fprintf(obj.fid,'\r\nDEFENSIVE INVESTOR CRITERIA\r\n\r\n');
@@ -524,6 +536,68 @@ classdef CompanyEval < CompanySearch
     end
     
     methods (Access = private)
+        
+        function obj = FScore(obj)
+           % Calculate the Piotroski F-Score based on reference:
+           % http://www.investopedia.com/terms/p/piotroski-score.asp
+           
+           % store yearFields for easier access
+           currYr = ['Y',num2str(obj.search.endYr)];
+           prevYr = ['Y',num2str(obj.search.endYr - 1)];
+           currData = obj.data.(currYr);
+           currCalcs = obj.calcs.(currYr);
+           prevData = obj.data.(prevYr);
+           prevCalcs = obj.calcs.(prevYr);
+           FScore = 0;
+           
+           % TODO: Store FScore as an array so the failed testss can be determined
+           
+           % Profitability------------------------------------------------------
+           % positive return on assets in current year
+           if (currCalcs.ReturnOnAssetsTotal > 0);FScore = FScore + 1;end;
+           
+           % positive operating cash flow in current year
+           if (currData.NetCashFromOperating > 0);FScore = FScore + 1;end;
+           
+           % TODO: Obtain return on assets in current period
+           % higher ROA in current period than previous year
+           if (currCalcs.ReturnOnAssetsTotal > prevCalcs.ReturnOnAssetsTotal)
+               FScore = FScore + 1;
+           end
+           
+           % higher ratio operating cash flow to assets than ROA in current year
+           if (currCalcs.RatioOperatingCashFlowAssetsTotal > ...
+                   currCalcs.ReturnOnAssetsTotal)
+               FScore = FScore + 1;
+           end
+           
+           % Leverage, Liquidity, and Source of Funds
+           % TODO: Obtain Long term debt in current period
+           % Lower Long term debt in current period vs previous year
+           if (currData.LongTermDebt <= prevData.LongTermDebt); ...
+                   FScore = FScore + 1;end;
+           
+           % higher current ratio this year compared to previous year
+           if (currCalcs.RatioAssetsLiabilitiesCurrent > ...
+                   prevCalcs.RatioAssetsLiabilitiesCurrent)
+               FScore = FScore + 1;
+           end
+           
+           % no new shares issued in the last year
+           if (obj.market.(currYr).ChangeInNumCommon <= 0);...
+                   FScore = FScore + 1;end;
+           
+           % Operating Efficiency
+           % higher gross margin this year compared to last year
+           if (currCalcs.GrossMargin > prevCalcs.GrossMargin);...
+                   FScore = FScore + 1;end;
+                      
+           % higher asset turnover compared to previous year
+           if (currCalcs.RatioAssetTurnover > prevCalcs.RatioAssetTurnover);...
+                   FScore = FScore + 1;end;
+           obj.calcs.(currYr).FScore = FScore;
+                      
+        end
         function obj = Pass(obj)
             fprintf(obj.fid,[obj.passText,'\r\n']); obj.passes = obj.passes + 1;
         end
